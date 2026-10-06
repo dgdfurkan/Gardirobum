@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env*
+!.env.example
+*.tsbuildinfo
+test-results/
+playwright-report/
+private/
+uploads/
+gardirobum-yedek*.json
