@@ -54,6 +54,9 @@ test('askılı ön ve yan görseller demirde aynı kanca noktasından döner', a
 }) => {
   const rack = page.getByTestId('rack-demo-shirt');
   await expect(rack).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Önceki Parça' }),
+  ).toBeEnabled();
   await page.waitForTimeout(300);
   const rail = await page.locator('.chrome-rail').boundingBox(),
     box = await rack.locator('..').boundingBox();
@@ -405,4 +408,18 @@ test('görsel yükleme hatası sonrası tekrar dene gardırobu açar', async ({
     page.getByRole('heading', { name: 'Ne giyiyoruz bugün?' }),
   ).toBeVisible();
   await expect(page.getByTestId('selected-demo-white')).toBeVisible();
+});
+test('düzenlenen parça kaydedildiğinde askıda o parça öne gelir', async ({
+  page,
+}) => {
+  await page.getByTestId('selected-demo-white').locator('.outfit-main').click();
+  await page.getByLabel('Parça Adı', { exact: true }).fill('Beyaz Tişörtüm');
+  await page
+    .getByRole('button', { name: 'Parçayı Kaydet', exact: true })
+    .click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.locator('.rack-selection h2')).toHaveText('Beyaz Tişörtüm');
+  await expect(
+    page.getByRole('button', { name: 'Önceki Parça' }),
+  ).toBeDisabled();
 });

@@ -186,6 +186,19 @@ export function Rack({
     };
   }, [signature, width, frame, spacing, padding, mobile, detailId]);
 
+  useEffect(() => {
+    const index = hanging.findIndex((item) => item.id === focused);
+    if (index < 0 || hanging[activeRef.current]?.id === focused) return;
+    activeRef.current = index;
+    setActiveId(focused);
+    pointer.current = null;
+    stage.current?.scrollTo({
+      left: Math.max(0, padding + index * spacing - width / 2),
+      behavior: 'instant',
+    });
+    wake.current();
+  }, [focused]);
+
   function focusIndex(index: number, scroll = true) {
     const next = Math.max(0, Math.min(hanging.length - 1, index));
     activeRef.current = next;
@@ -447,7 +460,7 @@ export function Rack({
           <button
             className="circle-button"
             aria-label="Önceki Parça"
-            disabled={!hanging.length || activeRef.current === 0}
+            disabled={!hanging.length || active?.id === hanging[0]?.id}
             onClick={() => focusIndex(activeRef.current - 1)}
           >
             <ChevronLeft size={17} />
@@ -466,7 +479,7 @@ export function Rack({
             className="circle-button"
             aria-label="Sonraki Parça"
             disabled={
-              !hanging.length || activeRef.current >= hanging.length - 1
+              !hanging.length || active?.id === hanging[hanging.length - 1]?.id
             }
             onClick={() => focusIndex(activeRef.current + 1)}
           >

@@ -6,8 +6,8 @@
 
 | Ölçüm                      |        Önceki sürüm |            Bu sürüm |
 | -------------------------- | ------------------: | ------------------: |
-| Başlangıç JavaScript       |     yaklaşık 525 kB |           324,19 kB |
-| Başlangıç JavaScript, gzip |     yaklaşık 173 kB |           105,02 kB |
+| Başlangıç JavaScript       |     yaklaşık 525 kB |     yaklaşık 324 kB |
+| Başlangıç JavaScript, gzip |     yaklaşık 173 kB |     yaklaşık 105 kB |
 | Harici yazı tipi isteği    |        Google Fonts |      0; yerel WOFF2 |
 | Görsel kaynağı             | açılışta PNG atlası | ayrı WebP dosyaları |
 
@@ -22,7 +22,7 @@ Animasyon yalnız askı dönüş ve opacity değerlerini değiştirir. İmleç g
 ## Kontroller
 
 - 16 birim testi: parça kimliği, katmanlar, kombin/kordon kaydı, kaynak ağının tam görüntü kapsamı, eski kayıtlara askı göçü ve yedek doğrulama.
-- 13 tarayıcı testi: askı kanca eşleşmesi, siyah/beyaz doğru görsel, kalıcı kayıt ve kayıt hatası, kendi kordon fotoğrafı, kişi kalibrasyonu, mobil taşma/kaydırma, detaydan dönüş, imleçte ayna kararlılığı, hareketi azalt tercihi ve yükleme sonrası yeniden deneme.
+- 14 tarayıcı testi: askı kanca eşleşmesi, siyah/beyaz doğru görsel, kalıcı kayıt ve kayıt hatası, kendi kordon fotoğrafı, kişi kalibrasyonu, mobil taşma/kaydırma, detaydan dönüş, imleçte ayna kararlılığı, hareketi azalt tercihi yükleme sonrası yeniden deneme ve düzenleme sonrası doğru parçaya odaklanma.
 - 1440 px masaüstü ve 390 px mobil tam sayfa görsel kontrolü; kesilen etek ve odak dönüşünde kayan kanca düzeltildi.
 - TypeScript üretim derlemesi ve Prettier biçim kontrolü.
 
