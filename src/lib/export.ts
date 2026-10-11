@@ -1,4 +1,3 @@
-import { zipSync, strToU8 } from 'fflate';
 import type { Asset, Wardrobe } from './types';
 import {
   assetFor,
@@ -51,6 +50,7 @@ async function png(asset: Asset) {
 export async function tryonPackage(state: Wardrobe) {
   if (!state.person.photo) throw Error('Önce kendi fotoğrafını ekle.');
   if (!state.selected.length) throw Error('Önce bir kombin seç.');
+  const { zipSync, strToU8 } = await import('fflate');
   const files: Record<string, Uint8Array> = {
     'person.png': await png(state.person.photo),
     'prompt.txt': strToU8(promptFor(state)),
@@ -65,7 +65,7 @@ export async function tryonPackage(state: Wardrobe) {
   }
   files['outfit.json'] = strToU8(
     JSON.stringify(
-      selectedSnapshot(state).map(({ images, variants, ...rest }) => ({
+      selectedSnapshot(state).map(({ images, rack, variants, ...rest }) => ({
         ...rest,
         variants: variants.map(({ image, ...v }) => v),
       })),

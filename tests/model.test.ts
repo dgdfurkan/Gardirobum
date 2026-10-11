@@ -11,6 +11,7 @@ import {
   outfitSettings,
 } from '../src/lib/model';
 import { affine, mesh, garmentTargets } from '../src/lib/warp';
+import { upgradeDemoRack } from '../src/lib/assets';
 import type { Asset, Wardrobe, Garment } from '../src/lib/types';
 const photo: Asset = {
   src: 'data:image/png;base64,AAAA',
@@ -21,6 +22,64 @@ const piece = (id: string, name: string) => ({
   ...newGarment(photo),
   id,
   name,
+});
+describe('askı varlıkları ve eski kayıtlar', () => {
+  const rack = {
+    front: photo,
+    side: photo,
+    frontPivot: { x: 0.5, y: 0.07 },
+    sidePivot: { x: 0.5, y: 0.04 },
+    revision: 1,
+  };
+  it('eski örnek kayda yalnız askı görsellerini ekler; adını ve kombini korur', () => {
+    const saved = state(),
+      seed = state();
+    saved.items[0].demo = true;
+    saved.items[0].name = 'Özel Adım';
+    saved.items[0].fit = 'oversize';
+    seed.items[0].rack = rack;
+    const next = upgradeDemoRack(saved, seed);
+    expect(next.items[0].rack).toEqual(rack);
+    expect(next.items[0].name).toBe('Özel Adım');
+    expect(next.items[0].fit).toBe('oversize');
+    expect(next.selected).toEqual(saved.selected);
+    expect(saved.items[0].rack).toBeUndefined();
+    expect(upgradeDemoRack(next, seed)).toBe(next);
+  });
+  it('kullanıcının fotoğraflarını ve kanca ayarlarını örneklerle değiştirmez', () => {
+    const saved = state(),
+      seed = state();
+    saved.items[0].demo = false;
+    saved.items[0].rack = {
+      ...rack,
+      frontPivot: { x: 0.41, y: 0.14 },
+      revision: undefined,
+    };
+    seed.items[0].rack = rack;
+    expect(upgradeDemoRack(saved, seed)).toBe(saved);
+    expect(saved.items[0].rack.frontPivot.x).toBe(0.41);
+  });
+  it('yedekte dış askı URL’sini ve bozuk kanca noktasını reddeder', () => {
+    const s = state();
+    s.items[0].rack = structuredClone(rack);
+    s.items[0].rack.sidePivot.y = -1;
+    expect(() => validateState(s)).toThrow();
+    s.items[0].rack.sidePivot.y = 0.04;
+    s.items[0].rack.front.src = 'https://example.com/photo.png';
+    expect(() => validateState(s)).toThrow();
+  });
+  it('yerleşim ağı tüm kaynak görüntüyü kapsar; omuz ve kol kenarlarını kırpmaz', () => {
+    const s = state(),
+      item = s.items[0];
+    const triangles = mesh(item.anchors, garmentTargets(item, s.person));
+    const area = triangles.reduce(
+      (sum, { source: [a, b, c] }) =>
+        sum +
+        Math.abs((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)) / 2,
+      0,
+    );
+    expect(area).toBeCloseTo(1, 10);
+  });
 });
 function state(): Wardrobe {
   const white = piece('white', 'Beyaz'),

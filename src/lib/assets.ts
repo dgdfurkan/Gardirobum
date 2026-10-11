@@ -1,4 +1,5 @@
-import type { Asset, Garment } from './types';
+import manifest from './demo-assets.json';
+import type { Asset, Garment, Wardrobe } from './types';
 import { newGarment, emptyState, defaultGarmentAnchors } from './model';
 export const loadImage = (src: string) =>
   new Promise<HTMLImageElement>((resolve, reject) => {
@@ -23,56 +24,47 @@ export async function readPhoto(file: File): Promise<Asset> {
     throw Error('36 megapikselden küçük bir fotoğraf ekle.');
   return { src, width: i.naturalWidth, height: i.naturalHeight };
 }
-let demoPromise: Promise<{
-  state: ReturnType<typeof emptyState>;
-  mannequin: Asset;
-}>;
+let demoPromise:
+  | Promise<{
+      state: ReturnType<typeof emptyState>;
+      mannequin: Asset;
+    }>
+  | undefined;
 export function loadDemo() {
   return (demoPromise ||= (async () => {
-    const image = await loadImage(
-      import.meta.env.BASE_URL + 'assets/wardrobe-atlas.png',
-    );
-    const size = image.naturalWidth / 3;
-    const cell = (index: number): Asset => {
-      const c = document.createElement('canvas');
-      c.width = size;
-      c.height = size;
-      const ctx = c.getContext('2d')!;
-      ctx.drawImage(
-        image,
-        (index % 3) * size,
-        Math.floor(index / 3) * size,
-        size,
-        size,
-        0,
-        0,
-        size,
-        size,
-      );
-      const pixels = ctx.getImageData(0, 0, size, size);
-      let minX = size,
-        minY = size,
-        maxX = 0,
-        maxY = 0;
-      for (let y = 0; y < size; y++)
-        for (let x = 0; x < size; x++)
-          if (pixels.data[(y * size + x) * 4 + 3] > 160) {
-            minX = Math.min(minX, x);
-            minY = Math.min(minY, y);
-            maxX = Math.max(maxX, x);
-            maxY = Math.max(maxY, y);
-          }
-      minX = Math.max(0, minX - 2);
-      minY = Math.max(0, minY - 2);
-      const w = Math.min(size - minX, maxX - minX + 5),
-        h = Math.min(size - minY, maxY - minY + 5);
-      const out = document.createElement('canvas');
-      out.width = w;
-      out.height = h;
-      out.getContext('2d')!.drawImage(c, minX, minY, w, h, 0, 0, w, h);
-      return { src: out.toDataURL('image/png'), width: w, height: h };
+    const readDemoAsset = async (entry: {
+      file: string;
+      width: number;
+      height: number;
+    }): Promise<Asset> => {
+      const response = await fetch(import.meta.env.BASE_URL + entry.file);
+      if (!response.ok) throw Error('Örnek kıyafet görseli yüklenemedi.');
+      const blob = await response.blob();
+      const src = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(Error('Örnek görsel okunamadı.'));
+        reader.readAsDataURL(blob);
+      });
+      return { src, width: entry.width, height: entry.height };
     };
-    const atlas = Array.from({ length: 9 }, (_, i) => cell(i));
+    const [atlas, rackEntries] = await Promise.all([
+      Promise.all(manifest.tryon.map(readDemoAsset)),
+      Promise.all(
+        Object.entries(manifest.rack).map(
+          async ([key, entry]) =>
+            [
+              key,
+              {
+                image: await readDemoAsset(entry),
+                pivot: entry.pivot,
+                scale: entry.scale,
+              },
+            ] as const,
+        ),
+      ),
+    ]);
+    const rack = Object.fromEntries(rackEntries);
     const spec = [
       ['demo-white', 'Beyaz Tişört', 'tshirt', 'Beyaz', 0],
       ['demo-black', 'Siyah Tişört', 'tshirt', 'Siyah', 1],
@@ -96,7 +88,26 @@ export function loadDemo() {
       item.kind = kind;
       item.category = categories[kind];
       item.color = color;
+      item.neck =
+        kind === 'shirt'
+          ? 'Gömlek Yaka'
+          : kind === 'tshirt'
+            ? 'Bisiklet Yaka'
+            : 'Uygulanmaz';
       item.demo = true;
+      const prefix = id.replace('demo-', '');
+      const front = rack[prefix + '-front'],
+        side = rack[prefix + '-side'];
+      if (front && side)
+        item.rack = {
+          front: front.image,
+          side: side.image,
+          frontPivot: front.pivot,
+          sidePivot: side.pivot,
+          frontScale: front.scale,
+          sideScale: side.scale,
+          revision: 1,
+        };
       item.position = 'head';
       item.sleeve =
         kind === 'shirt' ? 'long' : kind === 'tshirt' ? 'short' : 'none';
@@ -108,5 +119,24 @@ export function loadDemo() {
       return item;
     });
     return { state: emptyState(items, atlas[8]), mannequin: atlas[8] };
-  })());
+  })().catch((error) => {
+    demoPromise = undefined;
+    throw error;
+  }));
+}
+
+export function upgradeDemoRack(saved: Wardrobe, demo: Wardrobe): Wardrobe {
+  let changed = false;
+  const items = saved.items.map((item) => {
+    const seed = demo.items.find((x) => x.id === item.id);
+    if (
+      !item.demo ||
+      !seed?.rack ||
+      (item.rack?.revision || 0) >= (seed.rack.revision || 0)
+    )
+      return item;
+    changed = true;
+    return { ...item, rack: structuredClone(seed.rack) };
+  });
+  return changed ? { ...saved, items } : saved;
 }

@@ -117,5 +117,70 @@ export function mesh(
     const matrix = affine(s, t);
     if (matrix) out.push({ source: s, target: t, matrix });
   }
-  return out;
+  if (!out.length) return out;
+  // Calibration landmarks lie inside the silhouette. Extend the mesh to the
+  // image perimeter so sleeves and curved shoulders are never cut at its hull.
+  const edgeDistance = (p: Point, a: Point, b: Point) => {
+    const dx = b.x - a.x,
+      dy = b.y - a.y;
+    const t = Math.max(
+      0,
+      Math.min(
+        1,
+        ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy || 1),
+      ),
+    );
+    return (p.x - a.x - t * dx) ** 2 + (p.y - a.y - t * dy) ** 2;
+  };
+  const sourcePoints = [...points],
+    targetPoints = keys.map((k) => target[k]);
+  for (let n = 0; n < 4; n++) {
+    const t = n / 4;
+    for (const p of [
+      { x: t, y: 0 },
+      { x: 1, y: t },
+      { x: 1 - t, y: 1 },
+      { x: 0, y: 1 - t },
+    ]) {
+      if (
+        sourcePoints.some(
+          (q) => Math.abs(q.x - p.x) + Math.abs(q.y - p.y) < 1e-8,
+        )
+      )
+        continue;
+      const closest = out.reduce(
+        (best, triangle) => {
+          const distance = Math.min(
+            ...triangle.source.map((a, i) =>
+              edgeDistance(p, a, triangle.source[(i + 1) % 3]),
+            ),
+          );
+          return distance < best.distance
+            ? { distance, matrix: triangle.matrix }
+            : best;
+        },
+        { distance: Infinity, matrix: out[0].matrix },
+      );
+      const m = closest.matrix;
+      sourcePoints.push(p);
+      targetPoints.push({
+        x: m[0] * p.x + m[2] * p.y + m[4],
+        y: m[1] * p.x + m[3] * p.y + m[5],
+      });
+    }
+  }
+  const complete = Delaunator.from(
+    sourcePoints,
+    (p) => p.x,
+    (p) => p.y,
+  );
+  const result: typeof out = [];
+  for (let n = 0; n < complete.triangles.length; n += 3) {
+    const ids = Array.from(complete.triangles.slice(n, n + 3));
+    const s = ids.map((i) => sourcePoints[i]),
+      t = ids.map((i) => targetPoints[i]);
+    const matrix = affine(s, t);
+    if (matrix) result.push({ source: s, target: t, matrix });
+  }
+  return result;
 }

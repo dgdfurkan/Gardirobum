@@ -39,7 +39,30 @@ export function GarmentEditor({
       setDraft((d) => ({
         ...d,
         images: { ...d.images, [key]: image },
+        rack: d.demo && key === 'front' ? undefined : d.rack,
         demo: false,
+      }));
+      setError('');
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+  async function uploadRack(file: File, key: 'front' | 'side') {
+    try {
+      if (key === 'side' && !draft.rack?.front)
+        throw Error('Önce askılı ön fotoğrafını ekle.');
+      const image = await readPhoto(file);
+      setDraft((d) => ({
+        ...d,
+        demo: false,
+        rack: {
+          front: d.rack?.front || image,
+          frontPivot: d.rack?.frontPivot || { x: 0.5, y: 0.07 },
+          sidePivot: d.rack?.sidePivot || { x: 0.5, y: 0.07 },
+          ...d.rack,
+          [key]: image,
+          revision: undefined,
+        },
       }));
       setError('');
     } catch (e) {
@@ -147,6 +170,7 @@ export function GarmentEditor({
             {[
               ['info', 'Parça Bilgileri'],
               ['photos', 'Fotoğraflar'],
+              ...(warp ? [['rack', 'Askı Görünümü']] : []),
               ['anchors', 'Yerleşim Noktaları'],
               ...(watch ? [['variants', 'Saat & Kordonlar']] : []),
             ].map(([key, label]) => (
@@ -345,10 +369,11 @@ export function GarmentEditor({
           )}
           {tab === 'photos' && (
             <>
-              <h3>Her Görünüm Kendi Fotoğrafıyla</h3>
+              <h3>Giydirme Fotoğrafları</h3>
               <p className="help">
-                Şeffaf PNG kullan. Arka plan kendiliğinden silinmez; görselleri
-                birlikte hazırlayacağız.
+                Askısız, şeffaf PNG veya WebP kullan. Askılı görselleri ayrı
+                Askı Görünümü sekmesine ekle. Arka planı birlikte
+                hazırlayacağız.
               </p>
               <div className="photo-grid">
                 {(
@@ -383,6 +408,110 @@ export function GarmentEditor({
                     ön fotoğrafı kullanır.
                   </p>
                 )}
+            </>
+          )}
+          {tab === 'rack' && (
+            <>
+              <h3>Askı ve Kıyafet, Birlikte</h3>
+              <p className="help">
+                Askıyı içeren şeffaf ön fotoğraf ve gerçek yan profil ekle. İki
+                fotoğrafta da kancanın demire temas noktasını işaretle. Askısız
+                giydirme fotoğrafın ayrı kalır.
+              </p>
+              <div className="photo-grid">
+                <PhotoInput
+                  label="Askılı Ön"
+                  thumbnail={draft.rack?.front.src}
+                  onFile={(f) => uploadRack(f, 'front')}
+                />
+                <PhotoInput
+                  label="Askılı Yan"
+                  thumbnail={draft.rack?.side?.src}
+                  onFile={(f) => uploadRack(f, 'side')}
+                />
+              </div>
+              {draft.rack && (
+                <>
+                  <h3>Ön Görünüm Kancası</h3>
+                  <Calibration
+                    photo={draft.rack.front}
+                    points={{ hook: draft.rack.frontPivot }}
+                    labels={{ hook: 'Kanca temas' }}
+                    defaultPoints={{ hook: { x: 0.5, y: 0.07 } }}
+                    mode="garment"
+                    onChange={(points) =>
+                      setDraft((d) => ({
+                        ...d,
+                        demo: false,
+                        rack: {
+                          ...d.rack!,
+                          frontPivot: points.hook,
+                          revision: undefined,
+                        },
+                      }))
+                    }
+                  />
+                  <Range
+                    label="Ön Görünüm Boyutu"
+                    value={draft.rack.frontScale || 1}
+                    min={0.3}
+                    max={2}
+                    step={0.01}
+                    onChange={(v) =>
+                      setDraft((d) => ({
+                        ...d,
+                        demo: false,
+                        rack: {
+                          ...d.rack!,
+                          frontScale: v,
+                          revision: undefined,
+                        },
+                      }))
+                    }
+                  />
+                  {draft.rack.side && (
+                    <>
+                      <h3>Yan Görünüm Kancası</h3>
+                      <Calibration
+                        photo={draft.rack.side}
+                        points={{ hook: draft.rack.sidePivot }}
+                        labels={{ hook: 'Yan kanca temas' }}
+                        defaultPoints={{ hook: { x: 0.5, y: 0.07 } }}
+                        mode="garment"
+                        onChange={(points) =>
+                          setDraft((d) => ({
+                            ...d,
+                            demo: false,
+                            rack: {
+                              ...d.rack!,
+                              sidePivot: points.hook,
+                              revision: undefined,
+                            },
+                          }))
+                        }
+                      />
+                      <Range
+                        label="Yan Görünüm Boyutu"
+                        value={draft.rack.sideScale || 1}
+                        min={0.3}
+                        max={2}
+                        step={0.01}
+                        onChange={(v) =>
+                          setDraft((d) => ({
+                            ...d,
+                            demo: false,
+                            rack: {
+                              ...d.rack!,
+                              sideScale: v,
+                              revision: undefined,
+                            },
+                          }))
+                        }
+                      />
+                    </>
+                  )}
+                </>
+              )}
             </>
           )}
           {tab === 'anchors' && (

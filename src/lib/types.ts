@@ -53,6 +53,15 @@ export type Garment = {
     open?: Asset;
     partial?: Asset;
   };
+  rack?: {
+    front: Asset;
+    side?: Asset;
+    frontPivot: Point;
+    sidePivot: Point;
+    frontScale?: number;
+    sideScale?: number;
+    revision?: number;
+  };
   variants: Variant[];
   activeVariant: string | null;
   anchors: Record<string, Point>;

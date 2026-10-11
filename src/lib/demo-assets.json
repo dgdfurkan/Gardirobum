@@ -1,0 +1,151 @@
+{
+  "rack": {
+    "white-front": {
+      "file": "assets/rack/white-front.webp",
+      "width": 768,
+      "height": 1152,
+      "pivot": {
+        "x": 0.50195,
+        "y": 0.06641
+      },
+      "scale": 1.03672
+    },
+    "white-side": {
+      "file": "assets/rack/white-side.webp",
+      "width": 768,
+      "height": 1152,
+      "pivot": {
+        "x": 0.49512,
+        "y": 0.02474
+      },
+      "scale": 0.93514
+    },
+    "black-front": {
+      "file": "assets/rack/black-front.webp",
+      "width": 768,
+      "height": 1152,
+      "pivot": {
+        "x": 0.50195,
+        "y": 0.04557
+      },
+      "scale": 1.03671
+    },
+    "black-side": {
+      "file": "assets/rack/black-side.webp",
+      "width": 768,
+      "height": 1152,
+      "pivot": {
+        "x": 0.49609,
+        "y": 0.02474
+      },
+      "scale": 0.93514
+    },
+    "shirt-front": {
+      "file": "assets/rack/shirt-front.webp",
+      "width": 768,
+      "height": 1152,
+      "pivot": {
+        "x": 0.50195,
+        "y": 0.02214
+      },
+      "scale": 0.94641
+    },
+    "shirt-side": {
+      "file": "assets/rack/shirt-side.webp",
+      "width": 768,
+      "height": 1152,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.02214
+      },
+      "scale": 0.96695
+    },
+    "jeans-front": {
+      "file": "assets/rack/jeans-front.webp",
+      "width": 768,
+      "height": 1152,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.0332
+      },
+      "scale": 0.93123
+    },
+    "jeans-side": {
+      "file": "assets/rack/jeans-side.webp",
+      "width": 768,
+      "height": 1152,
+      "pivot": {
+        "x": 0.49902,
+        "y": 0.01693
+      },
+      "scale": 0.92415
+    },
+    "chino-front": {
+      "file": "assets/rack/chino-front.webp",
+      "width": 768,
+      "height": 1152,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.02344
+      },
+      "scale": 0.94708
+    },
+    "chino-side": {
+      "file": "assets/rack/chino-side.webp",
+      "width": 768,
+      "height": 1152,
+      "pivot": {
+        "x": 0.50537,
+        "y": 0.01302
+      },
+      "scale": 0.92543
+    }
+  },
+  "tryon": [
+    {
+      "file": "assets/tryon/white.webp",
+      "width": 304,
+      "height": 333
+    },
+    {
+      "file": "assets/tryon/black.webp",
+      "width": 309,
+      "height": 334
+    },
+    {
+      "file": "assets/tryon/shirt.webp",
+      "width": 308,
+      "height": 341
+    },
+    {
+      "file": "assets/tryon/shirt-open.webp",
+      "width": 335,
+      "height": 357
+    },
+    {
+      "file": "assets/tryon/jeans.webp",
+      "width": 166,
+      "height": 383
+    },
+    {
+      "file": "assets/tryon/chino.webp",
+      "width": 162,
+      "height": 377
+    },
+    {
+      "file": "assets/tryon/sneakers.webp",
+      "width": 303,
+      "height": 224
+    },
+    {
+      "file": "assets/tryon/cap.webp",
+      "width": 270,
+      "height": 254
+    },
+    {
+      "file": "assets/tryon/mannequin.webp",
+      "width": 134,
+      "height": 383
+    }
+  ]
+}

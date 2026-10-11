@@ -1,0 +1,425 @@
+.showroom {
+  background: #f1efe9;
+  border-color: #e6e2d9;
+  border-radius: 16px;
+  min-height: 590px;
+}
+.showroom .rack-room-label {
+  padding: 25px 28px 20px;
+  color: #8c8b7e;
+  font-size: 10px;
+  letter-spacing: 1.7px;
+}
+.rack-room-label > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #737f61;
+  box-shadow: 0 0 0 3px #737f6110;
+}
+.showroom-scene {
+  position: relative;
+  margin: 0 22px;
+}
+.showroom .chrome-rail {
+  top: 24px;
+  height: 5px;
+  border-radius: 8px;
+  background: linear-gradient(
+    #d3d2cb,
+    #fafbf8 28%,
+    #797c74 48%,
+    #dadbd4 78%,
+    #999b93
+  );
+  border: none;
+  z-index: 90;
+  box-shadow: 0 4px 5px #28282012;
+}
+.showroom .chrome-rail > i {
+  width: 8px;
+  top: -8px;
+  height: 23px;
+  border: none;
+  background: linear-gradient(90deg, #aaa99f, #eeeae1 50%, #a3a499);
+  border-radius: 3px;
+}
+.showroom .rack-stage {
+  margin: 0;
+  height: 416px;
+  perspective: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
+}
+.rack-stage::-webkit-scrollbar {
+  display: none;
+}
+.rack-track {
+  position: relative;
+  height: 100%;
+}
+.showroom .rack-item {
+  position: absolute;
+  top: 26px;
+  margin: 0;
+  transform: none;
+  transform-style: flat;
+  transform-origin: 50% 0;
+  will-change: auto;
+}
+.showroom .hanging-group {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  background: none;
+  transform-origin: 50% 0;
+  transform-style: flat;
+}
+.garment-motion {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 0;
+  will-change: transform;
+}
+.showroom .hanging-group:focus-visible {
+  outline-offset: -20px;
+  border-radius: 12px;
+}
+.rack-sprite {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+  filter: drop-shadow(3px 7px 5px #302a201c);
+  will-change: transform, opacity;
+}
+.rack-side + .rack-front {
+  opacity: 0;
+}
+.rack-flat {
+  position: absolute;
+  left: 12%;
+  top: 14%;
+  width: 76%;
+  height: 72%;
+  object-fit: contain;
+  filter: drop-shadow(3px 8px 5px #302a2018);
+  pointer-events: none;
+}
+.showroom .worn-tick {
+  bottom: 7%;
+  left: calc(50% - 9.5px);
+  right: auto;
+  width: 19px;
+  height: 19px;
+  background: #69745a;
+  box-shadow: 0 2px 6px #0001;
+}
+.showroom .rack-floor-shadow {
+  bottom: 8px;
+  height: 20px;
+  background: radial-gradient(ellipse, #6c5c4920, transparent 65%);
+  z-index: 0;
+  pointer-events: none;
+}
+.accessory-shelf {
+  position: relative;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 32px;
+  margin: -15px 28px 24px;
+  padding: 0 18px 16px;
+  border-bottom: 1px solid #ddd7cb;
+}
+.accessory-shelf::after {
+  content: '';
+  height: 4px;
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  right: 0;
+  background: #e5e1d7;
+  border-radius: 0 0 2px 2px;
+  box-shadow: 0 5px 9px #4538200a;
+}
+.accessory-shelf > button {
+  position: relative;
+  background: none;
+  padding: 0;
+  width: 100px;
+  text-align: center;
+}
+.accessory-shelf img {
+  width: 88px;
+  height: 52px;
+  object-fit: contain;
+  filter: drop-shadow(2px 3px 3px #302a2022);
+  transition: transform 0.3s ease;
+}
+.accessory-shelf button:hover img {
+  transform: translateY(-4px);
+}
+.accessory-shelf span {
+  display: block;
+  font-size: 9px;
+  color: #909083;
+  margin-top: 5px;
+}
+.accessory-shelf svg {
+  position: absolute;
+  top: 3px;
+  right: 2px;
+  color: #69745a;
+}
+.showroom .rack-selection {
+  max-width: 420px;
+  margin-top: 2px;
+  position: relative;
+  z-index: 1;
+}
+.showroom .rack-selection h2 {
+  font-size: 19px;
+}
+.showroom .rack-selection p {
+  color: #8c8b7e;
+}
+.showroom .rack-actions {
+  margin-top: 17px;
+  gap: 25px;
+}
+.showroom .rack-actions .button {
+  border-radius: 22px;
+  font-size: 12px;
+  padding: 10px 26px;
+  min-height: 40px;
+}
+.showroom .rack-hint {
+  margin: 15px 0 24px;
+  font-size: 10px;
+  color: #aaa699;
+}
+.rack-detail-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: #f1efe9c7;
+  backdrop-filter: blur(10px);
+  animation: fade-in 0.22s ease;
+}
+.rack-detail {
+  position: absolute;
+  z-index: 101;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  align-items: center;
+  gap: 12px;
+  padding: 70px 38px 40px;
+  animation: detail-arrive 0.3s ease;
+  outline: none;
+}
+.rack-detail-close {
+  position: absolute;
+  top: 24px;
+  left: 27px;
+  font-size: 11px;
+  gap: 9px;
+  color: #727367;
+}
+.rack-detail-close > svg:last-child {
+  margin-left: 10px;
+}
+.rack-detail-image {
+  height: 420px;
+}
+.rack-detail-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(7px 10px 10px #302a2025);
+}
+.rack-detail-copy {
+  max-width: 300px;
+}
+.rack-detail-copy h2 {
+  font-size: clamp(24px, 2.4vw, 34px);
+  letter-spacing: -1.3px;
+  line-height: 1.18;
+  font-weight: 500;
+}
+.rack-detail-copy > p:not(.eyebrow) {
+  font-size: 12px;
+  color: #898779;
+  margin: 15px 0;
+}
+.piece-spec {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 17px;
+  margin: 27px 0;
+  padding-top: 20px;
+  border-top: 1px solid #d9d5ca;
+}
+.piece-spec span {
+  color: #999584;
+  font-size: 10px;
+}
+.piece-spec strong {
+  display: block;
+  color: #45473e;
+  font-weight: 500;
+  font-size: 11px;
+  margin-top: 6px;
+}
+.rack-detail-copy > .button {
+  font-size: 12px;
+  border-radius: 23px;
+  min-height: 43px;
+}
+.rack-detail-copy > .text-button {
+  font-size: 11px;
+  margin-top: 11px;
+}
+.shelf-only .showroom-scene {
+  display: none;
+}
+.shelf-only .accessory-shelf {
+  min-height: 330px;
+  align-items: center;
+  margin-top: 10px;
+}
+.shelf-only .accessory-shelf > button {
+  width: 160px;
+}
+.shelf-only .accessory-shelf img {
+  width: 150px;
+  height: 160px;
+}
+@keyframes detail-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 1250px) {
+  .showroom .rack-stage {
+    height: 370px;
+  }
+  .rack-detail {
+    padding: 60px 25px 30px;
+  }
+  .rack-detail-image {
+    height: 330px;
+  }
+}
+@media (max-width: 700px) {
+  .showroom {
+    border-radius: 13px;
+    min-height: 510px;
+  }
+  .showroom .rack-room-label {
+    padding: 20px 20px 17px;
+    font-size: 9px;
+    letter-spacing: 1.3px;
+  }
+  .showroom-scene {
+    margin: 0 8px;
+  }
+  .showroom .chrome-rail {
+    left: 8px;
+    right: 8px;
+  }
+  .showroom .rack-stage {
+    height: 337px;
+  }
+  .showroom .rack-selection {
+    margin-top: 8px;
+    padding: 0 20px;
+  }
+  .showroom .rack-selection h2 {
+    font-size: 17px;
+  }
+  .showroom .rack-selection p {
+    font-size: 10px;
+  }
+  .accessory-shelf {
+    margin: -7px 20px 23px;
+    gap: 34px;
+  }
+  .accessory-shelf img {
+    height: 42px;
+    width: 72px;
+  }
+  .showroom .rack-actions {
+    gap: 20px;
+  }
+  .showroom .rack-actions .button {
+    padding: 10px 20px;
+    font-size: 11px;
+  }
+  .showroom .rack-actions .text-button {
+    font-size: 11px;
+  }
+  .showroom .rack-hint {
+    margin-bottom: 20px;
+    font-size: 9px;
+  }
+  .rack-detail {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(150px, 1fr) auto;
+    gap: 12px;
+    padding: 52px 29px 25px;
+  }
+  .rack-detail-image {
+    height: 100%;
+    max-height: 270px;
+  }
+  .rack-detail-copy {
+    max-width: none;
+  }
+  .rack-detail-copy h2 {
+    font-size: 24px;
+  }
+  .rack-detail-copy .eyebrow {
+    display: none;
+  }
+  .rack-detail-copy > p:not(.eyebrow) {
+    margin: 7px 0;
+    font-size: 11px;
+  }
+  .piece-spec {
+    margin: 13px 0;
+    padding-top: 11px;
+  }
+  .piece-spec strong {
+    margin-top: 3px;
+  }
+  .rack-detail-close {
+    top: 19px;
+    left: 21px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rack-detail,
+  .rack-detail-scrim {
+    animation: none;
+  }
+}

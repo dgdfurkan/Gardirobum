@@ -5,17 +5,17 @@
 | Dosya                              | Sorumluluk                                                                |
 | ---------------------------------- | ------------------------------------------------------------------------- |
 | `src/App.tsx`                      | Ekran durumu, sıralı kayıt işlemleri, kombinler ve aktarım                |
-| `src/components/Rack.tsx`          | Demir, askı, perspektif dönüş, dokunma ve kaydırma                        |
+| `src/components/Rack.tsx`          | Ön/yan ürün geçişi, sabit kanca, rAF hareketi, detay, doğal kaydırma      |
 | `src/components/Mirror.tsx`        | Katman sırası, kalibrasyonla yerleşim, içe aktarılan sonuç                |
 | `src/components/Calibration.tsx`   | Gerçek fotoğraf koordinatları üzerinde sürükleme ve klavye ile işaretleme |
 | `src/components/GarmentEditor.tsx` | Parça bilgileri, fotoğraflar, saat/kordon seçenekleri                     |
 | `src/components/PersonEditor.tsx`  | Kişi fotoğrafı ve vücut noktaları                                         |
-| `src/components/ui.tsx`            | Radix tabanlı özel menüler, modal ve kaydırıcılar                         |
+| `src/components/ui.tsx`            | Radix tabanlı özel menüler ve kaydırıcılar                                |
 | `src/lib/model.ts`                 | Kimlik, seçim yuvaları, kombin anlık görüntüsü, doğrulama                 |
-| `src/lib/warp.ts`                  | Delaunay ağı ve üçgenler için affine dönüşüm                              |
+| `src/lib/warp.ts`                  | Görüntünün tamamını kapsayan Delaunay ağı ve affine dönüşüm               |
 | `src/lib/storage.ts`               | IndexedDB işlemleri; yalnız `transaction.oncomplete` sonrası başarı       |
 | `src/lib/export.ts`                | Fotoğraf/prompt ZIP paketi                                                |
-| `src/lib/assets.ts`                | Örnek atlasın ayrı görsellere açılması ve fotoğraf okuma                  |
+| `src/lib/assets.ts`                | WebP örnek yükleme, eski örnek askı kayıtlarının göçü ve fotoğraf okuma   |
 
 ## Veri sözleşmesi
 
@@ -36,3 +36,9 @@ Değişiklikler önce kopyalanır, doğrulanır ve IndexedDB'ye yazılır. Kalı
 ## Birlikte geliştirme
 
 Codex ve Opus aynı repoyu klonlayabilir. Aynı dosyada eşzamanlı değişiklik yerine ayrı branch kullan; küçük PR'larla birleştir. `model.ts` ve `types.ts` sözleşmesini değiştiren PR'a veri göçü ekle. Her değişiklikte ilgili testleri çalıştır; seçim/kayıt/kalibrasyon hatası varsa önce regresyon senaryosunu koru.
+
+## Askı veri sözleşmesi
+
+`Garment.images` askısız giydirme fotoğraflarıdır. İsteğe bağlı `Garment.rack` askıyı içeren `front`, `side`, normalize `frontPivot`, `sidePivot` ve ayrı ölçekleri taşır. Kaynak en/boy oranı korunur; kanca noktası dönüş ve büyüme sırasında demirde sabit kalır. Eski sürüm 2 yedekler geçerlidir. Yalnız eski örnek parçaların eksik askı varlıkları güncellenir; parça bilgileri, kombinler ve kullanıcının fotoğrafları korunur. Askı fotoğrafını veya kanca ayarını değiştirmek parçayı kullanıcı varlığı olarak işaretler.
+
+İşaret noktalarının dışındaki kumaşın kesilmesini önlemek için yerleşim ağı görüntü sınırına uzatılır. Bu görsel yerleşim yöntemidir; AI tabanlı kumaş üretimiyle aynı değildir.

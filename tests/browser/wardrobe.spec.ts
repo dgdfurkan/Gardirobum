@@ -12,6 +12,8 @@ async function serve(page: Page) {
       '.js': 'text/javascript',
       '.css': 'text/css',
       '.png': 'image/png',
+      '.webp': 'image/webp',
+      '.woff2': 'font/woff2',
       '.svg': 'image/svg+xml',
     };
     try {
@@ -47,7 +49,7 @@ async function stored(page: Page) {
 test.beforeEach(async ({ page }) => {
   await serve(page);
 });
-test('askı merkezde açılır ve kıyafet aynı salınma grubundadır', async ({
+test('askılı ön ve yan görseller demirde aynı kanca noktasından döner', async ({
   page,
 }) => {
   const rack = page.getByTestId('rack-demo-shirt');
@@ -58,8 +60,22 @@ test('askı merkezde açılır ve kıyafet aynı salınma grubundadır', async (
   expect(
     Math.abs(box!.x + box!.width / 2 - (rail!.x + rail!.width / 2)),
   ).toBeLessThan(2);
-  expect(await rack.locator('.hanger-svg').count()).toBe(1);
-  expect(await rack.locator('.hanging-garment').count()).toBe(1);
+  expect(await rack.locator('.rack-front').count()).toBe(1);
+  expect(await rack.locator('.rack-side').count()).toBe(1);
+  const pivots = await rack.evaluate((button) =>
+    Array.from(button.querySelectorAll('img')).map((image) => {
+      const origin = getComputedStyle(image)
+        .transformOrigin.split(' ')
+        .map(parseFloat);
+      return {
+        x: image.offsetLeft + origin[0],
+        y: image.offsetTop + origin[1],
+      };
+    }),
+  );
+  expect(Math.abs(pivots[0].x - pivots[1].x)).toBeLessThan(1);
+  expect(Math.abs(pivots[0].y - pivots[1].y)).toBeLessThan(1);
+  expect(Math.abs(pivots[0].y)).toBeLessThan(1);
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await rack.hover();
@@ -72,9 +88,14 @@ test('siyah tişört tam olarak siyah görseli seçer; beyaz tişörtü kaldır�
   await page.getByRole('button', { name: /^Üstler/ }).click();
   const rack = page.getByTestId('rack-demo-black');
   await rack.click();
+  await expect(page.getByRole('dialog')).toContainText('Siyah Tişört');
+  await page.getByRole('button', { name: 'Bu Parçayı Giy' }).click();
+  await page.getByRole('button', { name: 'Askıya Dön' }).click();
   await expect(page.getByTestId('selected-demo-black')).toBeVisible();
   await expect(page.getByTestId('selected-demo-white')).toHaveCount(0);
-  const src = await rack.locator('img').getAttribute('src');
+  const state = await stored(page);
+  const src = state.items.find((i: any) => i.id === 'demo-black').images.front
+    .src;
   expect(
     await page
       .getByTestId('selected-demo-black')
@@ -101,7 +122,6 @@ test('siyah tişört tam olarak siyah görseli seçer; beyaz tişörtü kaldır�
     return sum / count;
   }, src);
   expect(average).toBeLessThan(80);
-  const state = await stored(page);
   expect(state.selected).toContain('demo-black');
 });
 test('parça kaydı ve özel seçim menüsü yenilemeden sonra korunur', async ({
@@ -177,18 +197,17 @@ test('akıllı saat, ayrı kordon fotoğrafı ve seçenek kaydedilir', async ({
     .getByTestId('selected-demo-white')
     .locator('img')
     .getAttribute('src');
-  const black = await page
-    .getByTestId('rack-demo-black')
-    .locator('img')
-    .getAttribute('src');
+  const black = (await stored(page)).items.find(
+    (i: any) => i.id === 'demo-black',
+  ).images.front.src;
   await page.getByRole('button', { name: 'Parça Ekle', exact: true }).click();
   await page.getByLabel('Parça Adı', { exact: true }).fill('Akıllı Saatim');
   await page.getByRole('combobox', { name: 'Parça Türü', exact: true }).click();
   await page.getByRole('option', { name: 'Akıllı Saat', exact: true }).click();
   await page.getByRole('tab', { name: 'Fotoğraflar', exact: true }).click();
   await page.getByLabel('Ön Görünüm', { exact: true }).setInputFiles({
-    name: 'watch.png',
-    mimeType: 'image/png',
+    name: 'watch.webp',
+    mimeType: 'image/webp',
     buffer: Buffer.from(white!.split(',')[1], 'base64'),
   });
   await page
@@ -199,8 +218,8 @@ test('akıllı saat, ayrı kordon fotoğrafı ve seçenek kaydedilir', async ({
     .click();
   await page.getByLabel('Kordon Adı 1', { exact: true }).fill('Siyah Kordon');
   await page.getByLabel('Siyah Kordon', { exact: true }).setInputFiles({
-    name: 'strap.png',
-    mimeType: 'image/png',
+    name: 'strap.webp',
+    mimeType: 'image/webp',
     buffer: Buffer.from(black!.split(',')[1], 'base64'),
   });
   await page
@@ -231,8 +250,8 @@ test('fotoğraftaki omuz noktası sürüklenip kalıcı kaydedilir', async ({
   await page
     .getByLabel('Tam Boy Fotoğrafını Ekle', { exact: true })
     .setInputFiles({
-      name: 'person.png',
-      mimeType: 'image/png',
+      name: 'person.webp',
+      mimeType: 'image/webp',
       buffer: Buffer.from(photo!.split(',')[1], 'base64'),
     });
   const point = page.locator('[data-anchor=shoulderLeft]'),
@@ -313,4 +332,77 @@ test('mobil görünüm taşmaz; kaydırma parçayı değiştirir ve yanlışlık
   );
   expect((await stored(page)).selected).toEqual(before);
   await page.screenshot({ path: 'test-results/mobile.png', fullPage: true });
+});
+test('imleçle dönüş aynayı yeniden çizmez ve kıyafetleri demirde tutar', async ({
+  page,
+}) => {
+  await page.evaluate(() => {
+    (window as any).mirrorChanges = 0;
+    new MutationObserver(
+      (records) => ((window as any).mirrorChanges += records.length),
+    ).observe(document.querySelector('.person-frame')!, {
+      subtree: true,
+      attributes: true,
+      childList: true,
+    });
+  });
+  const area = await page.locator('.rack-stage').boundingBox();
+  for (const fraction of [0.18, 0.35, 0.5, 0.7, 0.83]) {
+    await page.mouse.move(area!.x + area!.width * fraction, area!.y + 120);
+    await page.waitForTimeout(100);
+  }
+  expect(await page.evaluate(() => (window as any).mirrorChanges)).toBe(0);
+  expect(await page.locator('.rack-stage').evaluate((e) => e.scrollTop)).toBe(
+    0,
+  );
+  const state = await stored(page);
+  expect(state.selected).toEqual(['demo-white', 'demo-jeans', 'demo-sneakers']);
+});
+test('mobil detaydan dönünce kancalar demirden ayrılmaz', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Parçayı İncele' }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('button', { name: 'Askıya Dön' }).click();
+  expect(await page.locator('.rack-stage').evaluate((e) => e.scrollTop)).toBe(
+    0,
+  );
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > innerWidth,
+    ),
+  ).toBe(false);
+});
+test('hareketi azalt tercihinde klavye ile ürün değişimi çalışır', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.getByRole('button', { name: /^Üstler/ }).click();
+  await page.locator('.rack-stage').focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.locator('.rack-selection h2')).toHaveText('Siyah Tişört');
+  await expect(
+    page.getByTestId('rack-demo-black').locator('.rack-front'),
+  ).toHaveCSS('opacity', '1');
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('dialog')).toContainText('Siyah Tişört');
+});
+test('görsel yükleme hatası sonrası tekrar dene gardırobu açar', async ({
+  page,
+}) => {
+  let fail = true;
+  await page.route('**/assets/rack/white-front.webp', async (route) => {
+    if (fail) {
+      fail = false;
+      await route.fulfill({ status: 503, body: 'Temporary error' });
+    } else await route.fallback();
+  });
+  await page.reload();
+  await expect(page.getByRole('alert')).toContainText(
+    'Örnek kıyafet görseli yüklenemedi',
+  );
+  await page.getByRole('button', { name: 'Tekrar Dene' }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Ne giyiyoruz bugün?' }),
+  ).toBeVisible();
+  await expect(page.getByTestId('selected-demo-white')).toBeVisible();
 });

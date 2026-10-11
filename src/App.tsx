@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Check,
   Plus,
@@ -28,14 +28,22 @@ import {
   validateState,
   openingLabels,
 } from './lib/model';
-import { loadDemo, readPhoto } from './lib/assets';
+import { loadDemo, readPhoto, upgradeDemoRack } from './lib/assets';
 import { readState, writeState } from './lib/storage';
 import { download, promptFor, tryonPackage } from './lib/export';
 import { Rack } from './components/Rack';
 import { Mirror } from './components/Mirror';
-import { Modal, PhotoInput } from './components/ui';
-import { GarmentEditor } from './components/GarmentEditor';
-import { PersonEditor } from './components/PersonEditor';
+import { Modal, PhotoInput } from './components/modal';
+const GarmentEditor = lazy(() =>
+  import('./components/GarmentEditor').then((m) => ({
+    default: m.GarmentEditor,
+  })),
+);
+const PersonEditor = lazy(() =>
+  import('./components/PersonEditor').then((m) => ({
+    default: m.PersonEditor,
+  })),
+);
 type ModalState =
   | { type: 'item'; item: Garment; isNew: boolean }
   | { type: 'person' | 'backup' | 'save' | 'tryon' }
@@ -72,8 +80,8 @@ export default function App() {
     try {
       const demo = await loadDemo();
       const saved = await readState();
-      const value = saved || demo.state;
-      if (!saved) await writeState(value);
+      const value = saved ? upgradeDemoRack(saved, demo.state) : demo.state;
+      if (!saved || value !== saved) await writeState(value);
       current.current = value;
       setState(value);
       setMannequin(demo.mannequin);
@@ -191,6 +199,7 @@ export default function App() {
       close();
     }
   }
+  const key = useMemo(() => (state ? resultKey(state) : ''), [state]);
   if (!state || !mannequin)
     return (
       <div className="boot-screen">
@@ -216,7 +225,6 @@ export default function App() {
       (i) => filter === 'all' || i.category === filter,
     ),
     selected = selectedSnapshot(state),
-    key = resultKey(state),
     result = state.results[key];
   return (
     <>
@@ -479,22 +487,26 @@ export default function App() {
         wide
       >
         {modal?.type === 'item' && (
-          <GarmentEditor
-            key={modal.item.id}
-            initial={modal.item}
-            onSave={saveItem}
-            onCancel={close}
-            onDelete={
-              modal.isNew
-                ? undefined
-                : () =>
-                    setConfirmation({
-                      message:
-                        'Bu parça gardırobundan kaldırılacak. Devam edilsin mi?',
-                      action: () => removeItem(modal.item.id),
-                    })
-            }
-          />
+          <Suspense
+            fallback={<div className="modal-body">Düzenleyici açılıyor…</div>}
+          >
+            <GarmentEditor
+              key={modal.item.id}
+              initial={modal.item}
+              onSave={saveItem}
+              onCancel={close}
+              onDelete={
+                modal.isNew
+                  ? undefined
+                  : () =>
+                      setConfirmation({
+                        message:
+                          'Bu parça gardırobundan kaldırılacak. Devam edilsin mi?',
+                        action: () => removeItem(modal.item.id),
+                      })
+              }
+            />
+          </Suspense>
         )}
       </Modal>
       <Modal
@@ -505,12 +517,18 @@ export default function App() {
         wide
       >
         {modal?.type === 'person' && (
-          <PersonEditor
-            initial={state.person}
-            mannequin={mannequin}
-            onSave={savePerson}
-            onCancel={close}
-          />
+          <Suspense
+            fallback={
+              <div className="modal-body">Fotoğraf düzenleyici açılıyor…</div>
+            }
+          >
+            <PersonEditor
+              initial={state.person}
+              mannequin={mannequin}
+              onSave={savePerson}
+              onCancel={close}
+            />
+          </Suspense>
         )}
       </Modal>
       <Modal

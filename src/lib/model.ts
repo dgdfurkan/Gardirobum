@@ -80,10 +80,10 @@ export const bodyLabels: Record<string, string> = {
 export const defaultBody: Record<string, Point> = {
   head: { x: 0.5, y: 0.02 },
   eyes: { x: 0.5, y: 0.1 },
-  neckLeft: { x: 0.4, y: 0.17 },
-  neckRight: { x: 0.6, y: 0.17 },
-  shoulderLeft: { x: 0.16, y: 0.21 },
-  shoulderRight: { x: 0.84, y: 0.21 },
+  neckLeft: { x: 0.39, y: 0.157 },
+  neckRight: { x: 0.61, y: 0.157 },
+  shoulderLeft: { x: 0.16, y: 0.18 },
+  shoulderRight: { x: 0.84, y: 0.18 },
   armpitLeft: { x: 0.25, y: 0.31 },
   armpitRight: { x: 0.75, y: 0.31 },
   elbowLeft: { x: 0.09, y: 0.4 },
@@ -389,6 +389,21 @@ export function validateState(raw: unknown): Wardrobe {
     for (const image of Object.values(i.images))
       if (image && !isAsset(image))
         throw Error('Yedekteki bir fotoğraf geçersiz.');
+    if (
+      i.rack &&
+      (!isAsset(i.rack.front) ||
+        (i.rack.side && !isAsset(i.rack.side)) ||
+        !finitePoint(i.rack.frontPivot) ||
+        !finitePoint(i.rack.sidePivot))
+    )
+      throw Error('Askı görselleri veya kanca noktaları geçersiz.');
+    if (
+      i.rack &&
+      [i.rack.frontScale, i.rack.sideScale].some(
+        (x) => x !== undefined && (!Number.isFinite(x) || x < 0.2 || x > 3),
+      )
+    )
+      throw Error('Askı görselinin ölçeği geçersiz.');
     for (const key of Object.keys(defaultGarmentAnchors(i.category, i.sleeve)))
       if (!finitePoint(i.anchors?.[key]))
         throw Error('Yerleşim noktaları eksik veya geçersiz.');
